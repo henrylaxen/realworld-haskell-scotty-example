@@ -16,7 +16,7 @@ import Crypto.KDF.Argon2 qualified as Argon
 import Crypto.Random (MonadRandom (getRandomBytes))
 import Data.Aeson (FromJSON)
 import Data.ByteArray (Bytes, convert)
-import Data.ByteString.Base64 --  (decodeBase64, encodeBase64)
+import Data.ByteString.Base64
 #if MIN_VERSION_base64(1,0,0)
 import Data.Base64.Types
 #endif
