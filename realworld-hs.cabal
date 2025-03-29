@@ -85,7 +85,6 @@ library
           TypeFamilies
           GADTs
           ViewPatterns
-          NoFieldSelectors
     ghc-options: -Wall -Wno-orphans -Wno-unrecognised-pragmas -O1
     build-depends:
           aeson
@@ -113,7 +112,7 @@ library
     mixins:
           base hiding (Prelude)
         , relude (Relude as Prelude)
-        , relude 
+        , relude
     default-language: GHC2021
 
 executable app
@@ -169,7 +168,7 @@ executable app
     mixins:
           base hiding (Prelude)
         , relude (Relude as Prelude)
-        , relude 
+        , relude
     default-language: GHC2021
 
 test-suite spec
@@ -232,5 +231,5 @@ test-suite spec
     mixins:
           base hiding (Prelude)
         , relude (Relude as Prelude)
-        , relude 
+        , relude
     default-language: GHC2021

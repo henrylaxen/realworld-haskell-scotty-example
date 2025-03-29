@@ -17,9 +17,8 @@ import Conduit.Utils ((.-))
 import Data.List (lookup)
 import Database.Esqueleto.Experimental (groupBy, in_, limit, offset, orderBy, select, val, valList, where_, (:&)(..), (==.))
 import Database.Esqueleto.Experimental qualified as E
-import Relude.Extra (bimapBoth)
 import UnliftIO (MonadUnliftIO)
-import Web.Scotty.Trans (ActionT, ScottyT, captureParams, get, json)
+import Web.Scotty.Trans.Strict (ActionT, ScottyT, captureParams, get, json)
 
 data FilterOps = FilterOps
   { filterLimit  :: Int64
@@ -39,7 +38,7 @@ getFeedArticles userID ops = runExceptT do
 
 parseFilterOps :: ActionT AppM FilterOps
 parseFilterOps = do
-  params <- captureParams <&> map (bimapBoth toStrict)
+  params <- captureParams
 
   pure $ FilterOps
     { filterLimit  = (lookup "limit"  params >>= toString .- readMaybe) ?: 20

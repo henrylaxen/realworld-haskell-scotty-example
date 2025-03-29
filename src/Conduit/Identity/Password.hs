@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances, FieldSelectors #-}
+{-# LANGUAGE CPP #-}
 
 module Conduit.Identity.Password
   ( HashedPassword(..)
@@ -15,7 +16,10 @@ import Crypto.KDF.Argon2 qualified as Argon
 import Crypto.Random (MonadRandom (getRandomBytes))
 import Data.Aeson (FromJSON)
 import Data.ByteArray (Bytes, convert)
-import Data.ByteString.Base64 (decodeBase64, encodeBase64)
+import Data.ByteString.Base64 --  (decodeBase64, encodeBase64)
+#if MIN_VERSION_base64(1,0,0)
+import Data.Base64.Types
+#endif
 import Data.Text (splitOn)
 import Relude.Unsafe as Unsafe ((!!))
 
@@ -45,7 +49,7 @@ argonOptions = defaultOptions
   { variant = Argon2id
   , parallelism = 2
   , iterations  = 2
-  , memory = 65536 
+  , memory = 65536
   }
 
 hashStrParams :: Text
@@ -56,7 +60,11 @@ newSalt :: (MonadIO m) => m ByteString
 newSalt = liftIO $ getRandomBytes 16
 
 extractSalt :: HashedPassword -> Maybe ByteString
+#if MIN_VERSION_base64(1,0,0)
+extractSalt (HashedPassword hash') = rightToMaybe . decodeBase64Untyped . encodeUtf8 $ splitOn "$" hash' Unsafe.!! 4
+#else
 extractSalt (HashedPassword hash') = rightToMaybe . decodeBase64 . encodeUtf8 $ splitOn "$" hash' Unsafe.!! 4
+#endif
 
 text2bytes :: Text -> Bytes
 text2bytes = convert . encodeUtf8 @_ @ByteString
@@ -69,7 +77,13 @@ hashPasswordWithSalt (UnsafePassword password) salt =
    in mkHashedPassword (convert digest) salt
 
 mkHashedPassword :: ByteString -> ByteString -> HashedPassword
-mkHashedPassword digest salt = HashedPassword $ hashStrParams <> salt' <> "$" <> digest'
+#if MIN_VERSION_base64(1,0,0)
+mkHashedPassword digest salt = HashedPassword $
+  hashStrParams <> extractBase64 salt' <> "$" <> extractBase64 digest'
+#else
+mkHashedPassword digest salt = HashedPassword $
+  hashStrParams <> salt' <> "$" <> digest'
+#endif
   where digest' = encodeBase64 digest; salt' = encodeBase64 salt;
 
 -- | Validates a plaintext password against its hashed potential counterpart.

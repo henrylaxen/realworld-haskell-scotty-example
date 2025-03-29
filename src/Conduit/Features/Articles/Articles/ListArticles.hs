@@ -19,7 +19,6 @@ import Data.Text.Lazy.Builder qualified as TB
 import Database.Esqueleto.Experimental (exists, from, groupBy, in_, just, leftJoin, limit, offset, on, orderBy, select, subSelectList, table, val, valList, where_, (:&) (..), (==.))
 import Database.Esqueleto.Experimental qualified as E
 import Database.Esqueleto.Internal.Internal (unsafeSqlValue)
-import Relude.Extra (bimapBoth)
 import UnliftIO (MonadUnliftIO)
 import Web.Scotty.Trans (ActionT, ScottyT, captureParams, get, json)
 
@@ -39,7 +38,7 @@ handleListArticles = get "/api/articles/" $ maybeWithAuth \user -> do
 
 parseFilterOps :: ActionT AppM FilterOps
 parseFilterOps = do
-  params <- captureParams <&> map (bimapBoth toStrict)
+  params <- captureParams
 
   pure $ FilterOps
     { filterTag    =  lookup "tag"       params
